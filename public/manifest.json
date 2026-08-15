@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "GITLOVE",
+  "version": "0.1.0",
+  "description": "Your Lovable projects, directly powered by GitHub.",
+  "action": {
+    "default_title": "GITLOVE",
+    "default_popup": "index.html"
+  },
+  "permissions": [
+    "storage"
+  ]
+}
