@@ -6,8 +6,14 @@ import "./App.css";
 type Page = "dashboard" | "github";
 
 function App() {
-  const [activated, setActivated] = useState(false);
-  const [code, setCode] = useState("");
+  const [activated, setActivated] = useState(() => {
+    return localStorage.getItem("gitlove-activated") === "true";
+  });
+
+  const [code, setCode] = useState(() => {
+    return localStorage.getItem("gitlove-license-code") ?? "";
+  });
+
   const [message, setMessage] = useState("");
   const [page, setPage] = useState<Page>("dashboard");
 
@@ -15,7 +21,16 @@ function App() {
     const params = new URLSearchParams(window.location.search);
 
     if (params.get("github") === "connected") {
-      window.history.replaceState({}, "", window.location.pathname);
+      localStorage.setItem("gitlove-activated", "true");
+
+      setActivated(true);
+      setPage("dashboard");
+
+      window.history.replaceState(
+        {},
+        "",
+        window.location.pathname,
+      );
     }
   }, []);
 
@@ -23,21 +38,28 @@ function App() {
     const normalizedCode = code.trim().toUpperCase();
 
     if (normalizedCode === "GL-DEMO-2026") {
-      setMessage("✓ GITLOVE activado correctamente");
+      localStorage.setItem("gitlove-activated", "true");
+      localStorage.setItem(
+        "gitlove-license-code",
+        normalizedCode,
+      );
+
+      setMessage("✓ GITLOVE activated successfully");
 
       setTimeout(() => {
         setActivated(true);
-      }, 500);
+        setPage("dashboard");
+      }, 400);
 
       return;
     }
 
     if (!normalizedCode) {
-      setMessage("Introduce tu código de activación.");
+      setMessage("Enter your activation code.");
       return;
     }
 
-    setMessage("Código no válido.");
+    setMessage("Invalid activation code.");
   };
 
   if (activated) {
@@ -45,7 +67,11 @@ function App() {
       return <GitHub />;
     }
 
-    return <Dashboard onGitHub={() => setPage("github")} />;
+    return (
+      <Dashboard
+        onGitHub={() => setPage("github")}
+      />
+    );
   }
 
   return (
@@ -59,7 +85,9 @@ function App() {
           <span>GITLOVE</span>
         </div>
 
-        <p className="eyebrow">AI CODING WORKSPACE</p>
+        <p className="eyebrow">
+          AI CODING WORKSPACE
+        </p>
 
         <h1>
           Your Lovable projects,
@@ -68,19 +96,24 @@ function App() {
         </h1>
 
         <p className="description">
-          Build, modify and improve your project using an AI coding agent
-          connected to your GitHub repository.
+          Build, modify and improve your project
+          using an AI coding agent connected to
+          your GitHub repository.
         </p>
 
         <div className="form">
-          <label htmlFor="activation-code">Activation code</label>
+          <label htmlFor="activation-code">
+            Activation code
+          </label>
 
           <input
             id="activation-code"
             type="text"
             placeholder="GL-XXXX-XXXX-XXXX"
             value={code}
-            onChange={(event) => setCode(event.target.value)}
+            onChange={(event) =>
+              setCode(event.target.value)
+            }
             onKeyDown={(event) => {
               if (event.key === "Enter") {
                 activate();
@@ -88,12 +121,16 @@ function App() {
             }}
           />
 
-          <button onClick={activate}>Activate GITLOVE</button>
+          <button onClick={activate}>
+            Activate GITLOVE
+          </button>
 
           {message && (
             <div
               className={`message ${
-                message.startsWith("✓") ? "success" : "error"
+                message.startsWith("✓")
+                  ? "success"
+                  : "error"
               }`}
             >
               {message}
@@ -103,7 +140,9 @@ function App() {
 
         <div className="security">
           <span className="security-icon">✓</span>
-          <span>Secure GitHub connection</span>
+          <span>
+            Secure GitHub connection
+          </span>
         </div>
 
         <div className="footer">

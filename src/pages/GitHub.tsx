@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import {
+  createGitHubBranch,
   getGitHubAuthorizationUrl,
+  getGitHubBranches,
   getGitHubRepositories,
   getGitHubUser,
 } from "../services/api";
@@ -21,18 +23,31 @@ type Repository = {
   html_url: string;
 };
 
+type Branch = {
+  name: string;
+  protected: boolean;
+};
+
 function GitHub() {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
+  const [loadingBranches, setLoadingBranches] = useState(false);
+  const [creatingBranch, setCreatingBranch] = useState(false);
+
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const [user, setUser] = useState<GitHubUser | null>(null);
+
   const [repositories, setRepositories] = useState<Repository[]>([]);
   const [selectedRepository, setSelectedRepository] =
     useState<Repository | null>(null);
 
+  const [branches, setBranches] = useState<Branch[]>([]);
   const [selectedBranch, setSelectedBranch] = useState("");
+
   const [projectSaved, setProjectSaved] = useState(false);
+  const [workBranch, setWorkBranch] = useState("");
 
   useEffect(() => {
     const loadGitHubData = async () => {
@@ -63,7 +78,8 @@ function GitHub() {
       setLoading(true);
       setError("");
 
-      const authorizationUrl = await getGitHubAuthorizationUrl();
+      const authorizationUrl =
+        await getGitHubAuthorizationUrl();
 
       window.location.href = authorizationUrl;
     } catch (err) {
@@ -73,9 +89,81 @@ function GitHub() {
     }
   };
 
+  const loadBranches = async (repository: Repository) => {
+    try {
+      setLoadingBranches(true);
+      setError("");
+      setSuccessMessage("");
+
+      const [owner, repoName] =
+        repository.full_name.split("/");
+
+      if (!owner || !repoName) {
+        throw new Error("Invalid repository name.");
+      }
+
+      const data = await getGitHubBranches(
+        owner,
+        repoName,
+      );
+
+      setBranches(data.branches);
+
+      const defaultBranch = data.branches.find(
+        (branch: Branch) =>
+          branch.name === repository.default_branch,
+      );
+
+      setSelectedBranch(
+        defaultBranch?.name ??
+          data.branches[0]?.name ??
+          "",
+      );
+    } catch (err) {
+      console.error(err);
+
+      setBranches([]);
+      setSelectedBranch("");
+      setError(
+        "Unable to load repository branches.",
+      );
+    } finally {
+      setLoadingBranches(false);
+    }
+  };
+
+  const handleRepositoryChange = async (
+    event: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const repository = repositories.find(
+      (repo) =>
+        repo.id === Number(event.target.value),
+    );
+
+    setSelectedRepository(
+      repository ?? null,
+    );
+
+    setBranches([]);
+    setSelectedBranch("");
+    setProjectSaved(false);
+    setWorkBranch("");
+    setSuccessMessage("");
+    setError("");
+
+    if (repository) {
+      await loadBranches(repository);
+    }
+  };
+
   const handleUseProject = () => {
-    if (!selectedRepository || !selectedBranch) {
-      setError("Selecciona un repositorio y una rama.");
+    if (
+      !selectedRepository ||
+      !selectedBranch
+    ) {
+      setError(
+        "Selecciona un repositorio y una rama.",
+      );
       return;
     }
 
@@ -83,21 +171,81 @@ function GitHub() {
       "gitlove-project",
       JSON.stringify({
         repositoryId: selectedRepository.id,
-        repository: selectedRepository.full_name,
+        repository:
+          selectedRepository.full_name,
         branch: selectedBranch,
       }),
     );
 
     setProjectSaved(true);
     setError("");
+    setSuccessMessage(
+      "Project selected successfully.",
+    );
+  };
+
+  const handleCreateWorkBranch = async () => {
+    if (
+      !selectedRepository ||
+      !selectedBranch
+    ) {
+      setError(
+        "Selecciona un repositorio y una rama base.",
+      );
+      return;
+    }
+
+    try {
+      setCreatingBranch(true);
+      setError("");
+      setSuccessMessage("");
+
+      const [owner, repoName] =
+        selectedRepository.full_name.split("/");
+
+      const newBranch =
+        `gitlove/task-${Date.now()}`;
+
+      const result =
+        await createGitHubBranch(
+          owner,
+          repoName,
+          selectedBranch,
+          newBranch,
+        );
+
+      setWorkBranch(
+        result.branch.name,
+      );
+
+      setSuccessMessage(
+        `Work branch created: ${result.branch.name}`,
+      );
+
+      setProjectSaved(true);
+    } catch (err) {
+      console.error(err);
+
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to create work branch.",
+      );
+    } finally {
+      setCreatingBranch(false);
+    }
   };
 
   if (loadingData) {
     return (
       <div className="github-page">
         <div className="github-header">
-          <p className="section-label">INTEGRATION</p>
+          <p className="section-label">
+            INTEGRATION
+          </p>
+
           <h1>GitHub</h1>
+
           <p className="github-description">
             Loading your GitHub account...
           </p>
@@ -110,15 +258,22 @@ function GitHub() {
     return (
       <div className="github-page">
         <div className="github-header">
-          <p className="section-label">INTEGRATION</p>
+          <p className="section-label">
+            INTEGRATION
+          </p>
+
           <h1>GitHub</h1>
+
           <p className="github-description">
-            Connect your GitHub account to continue.
+            Connect your GitHub account to
+            continue.
           </p>
         </div>
 
         <div className="github-card">
-          <div className="github-logo">◆</div>
+          <div className="github-logo">
+            ◆
+          </div>
 
           <div className="github-content">
             <div className="github-status">
@@ -126,10 +281,13 @@ function GitHub() {
               Not connected
             </div>
 
-            <h2>Connect your GitHub account</h2>
+            <h2>
+              Connect your GitHub account
+            </h2>
 
             <p>
-              GITLOVE uses GitHub's official authorization flow to connect your
+              GITLOVE uses GitHub&apos;s official
+              authorization flow to connect your
               repositories securely.
             </p>
 
@@ -138,11 +296,18 @@ function GitHub() {
               onClick={handleConnect}
               disabled={loading}
             >
-              {loading ? "Connecting..." : "Connect GitHub"}
+              {loading
+                ? "Connecting..."
+                : "Connect GitHub"}
+
               {!loading && <span>→</span>}
             </button>
 
-            {error && <div className="github-error">{error}</div>}
+            {error && (
+              <div className="github-error">
+                {error}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -152,14 +317,16 @@ function GitHub() {
   return (
     <div className="github-page">
       <div className="github-header">
-        <div>
-          <p className="section-label">INTEGRATION</p>
-          <h1>GitHub</h1>
+        <p className="section-label">
+          INTEGRATION
+        </p>
 
-          <p className="github-description">
-            Your GitHub account is connected to GITLOVE.
-          </p>
-        </div>
+        <h1>GitHub</h1>
+
+        <p className="github-description">
+          Your GitHub account is connected to
+          GITLOVE.
+        </p>
       </div>
 
       <div className="github-profile-card">
@@ -177,15 +344,22 @@ function GitHub() {
 
           <h2>@{user.login}</h2>
 
-          <p>Authorized account</p>
+          <p>
+            Authorized account
+          </p>
         </div>
       </div>
 
       <div className="github-repository-section">
         <div className="repository-heading">
           <div>
-            <p className="section-label">PROJECT</p>
-            <h2>Select a repository</h2>
+            <p className="section-label">
+              PROJECT
+            </p>
+
+            <h2>
+              Select a repository
+            </h2>
           </div>
 
           <span className="repository-count">
@@ -195,26 +369,26 @@ function GitHub() {
 
         <select
           className="repository-select"
-          value={selectedRepository?.id ?? ""}
-          onChange={(event) => {
-            const repository = repositories.find(
-              (repo) => repo.id === Number(event.target.value),
-            );
-
-            setSelectedRepository(repository ?? null);
-            setSelectedBranch(
-              repository?.default_branch ?? "",
-            );
-            setProjectSaved(false);
-            setError("");
-          }}
+          value={
+            selectedRepository?.id ?? ""
+          }
+          onChange={
+            handleRepositoryChange
+          }
         >
-          <option value="">Choose a repository</option>
+          <option value="">
+            Choose a repository
+          </option>
 
           {repositories.map((repo) => (
-            <option key={repo.id} value={repo.id}>
+            <option
+              key={repo.id}
+              value={repo.id}
+            >
               {repo.full_name}
-              {repo.private ? " • Private" : " • Public"}
+              {repo.private
+                ? " • Private"
+                : " • Public"}
             </option>
           ))}
         </select>
@@ -227,7 +401,11 @@ function GitHub() {
                   SELECTED REPOSITORY
                 </span>
 
-                <strong>{selectedRepository.full_name}</strong>
+                <strong>
+                  {
+                    selectedRepository.full_name
+                  }
+                </strong>
               </div>
 
               <div>
@@ -235,36 +413,75 @@ function GitHub() {
                   DEFAULT BRANCH
                 </span>
 
-                <strong>{selectedRepository.default_branch}</strong>
+                <strong>
+                  {
+                    selectedRepository.default_branch
+                  }
+                </strong>
               </div>
             </div>
 
             <div className="branch-section">
               <div className="repository-heading">
                 <div>
-                  <p className="section-label">BRANCH</p>
-                  <h2>Select a branch</h2>
+                  <p className="section-label">
+                    BASE BRANCH
+                  </p>
+
+                  <h2>
+                    Select a branch
+                  </h2>
                 </div>
+
+                {loadingBranches && (
+                  <span className="repository-count">
+                    Loading...
+                  </span>
+                )}
               </div>
 
               <select
                 className="repository-select"
                 value={selectedBranch}
                 onChange={(event) => {
-                  setSelectedBranch(event.target.value);
+                  setSelectedBranch(
+                    event.target.value,
+                  );
+
                   setProjectSaved(false);
+                  setWorkBranch("");
+                  setSuccessMessage("");
                   setError("");
                 }}
+                disabled={loadingBranches}
               >
-                <option value="">Choose a branch</option>
-                <option value={selectedRepository.default_branch}>
-                  {selectedRepository.default_branch}
+                <option value="">
+                  {loadingBranches
+                    ? "Loading branches..."
+                    : "Choose a branch"}
                 </option>
+
+                {branches.map((branch) => (
+                  <option
+                    key={branch.name}
+                    value={branch.name}
+                  >
+                    {branch.name}
+                    {branch.protected
+                      ? " • Protected"
+                      : ""}
+                  </option>
+                ))}
               </select>
 
               <button
                 className="use-project-button"
                 onClick={handleUseProject}
+                disabled={
+                  loadingBranches ||
+                  !selectedRepository ||
+                  !selectedBranch
+                }
               >
                 Use this project
                 <span>→</span>
@@ -272,11 +489,74 @@ function GitHub() {
 
               {projectSaved && (
                 <div className="project-saved">
-                  ✓ Project selected successfully
+                  ✓ Project selected
+                  successfully
                 </div>
               )}
+
+              <div className="work-branch-box">
+                <div>
+                  <p className="section-label">
+                    SAFE DEVELOPMENT
+                  </p>
+
+                  <h2>
+                    Create a work branch
+                  </h2>
+
+                  <p className="work-branch-description">
+                    GITLOVE will create a separate
+                    branch from your selected base
+                    branch. Your main code remains
+                    protected.
+                  </p>
+                </div>
+
+                <button
+                  className="use-project-button"
+                  onClick={
+                    handleCreateWorkBranch
+                  }
+                  disabled={
+                    creatingBranch ||
+                    loadingBranches ||
+                    !selectedRepository ||
+                    !selectedBranch
+                  }
+                >
+                  {creatingBranch
+                    ? "Creating branch..."
+                    : "Create work branch"}
+
+                  {!creatingBranch && (
+                    <span>→</span>
+                  )}
+                </button>
+
+                {workBranch && (
+                  <div className="branch-created">
+                    <span>✓</span>
+
+                    <div>
+                      <small>
+                        WORK BRANCH CREATED
+                      </small>
+
+                      <strong>
+                        {workBranch}
+                      </strong>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </>
+        )}
+
+        {successMessage && (
+          <div className="project-saved">
+            ✓ {successMessage}
+          </div>
         )}
 
         {error && (
