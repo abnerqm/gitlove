@@ -1,39 +1,60 @@
-import { useState } from "react";
-import "./App.css";
+import React, { useState } from 'react';
+import { Heart, Sparkles, MessageCircle, CheckCircle2 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 export default function App() {
-  const [greeting, setGreeting] = useState<string | null>(null);
-  const [count, setCount] = useState(0);
+  const [greetingCount, setGreetingCount] = useState<number>(0);
+  const [showToast, setShowToast] = useState<boolean>(false);
 
   const handleHolaClick = () => {
-    setCount((prev) => prev + 1);
-    setGreeting("¡Hola! 👋 ¡Bienvenido a tu primera app creada con GITLOVE!");
+    setGreetingCount((prev) => prev + 1);
+    setShowToast(true);
+    
+    // Lanzar efecto de confeti visual
+    confetti({
+      particleCount: 80,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#ec4899', '#8b5cf6', '#3b82f6', '#f472b6']
+    });
+
+    // Ocultar notificación automáticamente después de 3 segundos
+    setTimeout(() => {
+      setShowToast(false);
+    }, 3000);
   };
 
   return (
     <div className="app-container">
       <div className="card">
         <div className="badge">
-          <span className="heart">❤️</span> Powered by GITLOVE
+          <Heart size={16} fill="currentColor" />
+          <span>GITLOVE Agent</span>
         </div>
+
+        <h1 className="title">Mi primera app GITLOVE</h1>
         
-        <h1>Mi primera app GITLOVE</h1>
-        
-        <p className="subtitle">
-          ¡Haz clic en el botón para interactuar!
+        <p className="description">
+          ¡Bienvenido a tu nueva aplicación creada de forma autónoma por GITLOVE! Presiona el botón para comenzar.
         </p>
 
-        <button className="hola-btn" onClick={handleHolaClick}>
+        <button className="btn-hola" onClick={handleHolaClick}>
+          <MessageCircle size={22} />
           Hola
+          <Sparkles size={18} />
         </button>
 
-        {greeting && (
-          <div className="response-box">
-            <p className="greeting">{greeting}</p>
-            <span className="counter-badge">
-              Has presionado "Hola" {count} {count === 1 ? "vez" : "veces"} ✨
-            </span>
+        {showToast && (
+          <div className="toast">
+            <CheckCircle2 size={18} />
+            <span>¡Hola! Te damos la bienvenida a GITLOVE 🎉</span>
           </div>
+        )}
+
+        {greetingCount > 0 && (
+          <p className="counter">
+            Has hecho clic en <strong>Hola</strong> {greetingCount} {greetingCount === 1 ? 'vez' : 'veces'}
+          </p>
         )}
       </div>
     </div>
