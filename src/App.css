@@ -1,16 +1,18 @@
 .app-container {
+  position: relative;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 2rem;
-  position: relative;
-  overflow: hidden;
+  padding: 24px;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .background-glow {
   position: absolute;
+  width: 320px;
+  height: 320px;
   border-radius: 50%;
   filter: blur(100px);
   opacity: 0.25;
@@ -18,95 +20,93 @@
 }
 
 .glow-one {
-  width: 400px;
-  height: 400px;
-  background: var(--accent, #aa3bff);
-  top: -100px;
-  left: -100px;
+  top: -50px;
+  left: -50px;
+  background: #aa3bff;
 }
 
 .glow-two {
-  width: 350px;
-  height: 350px;
+  bottom: -50px;
+  right: -50px;
   background: #3b82f6;
-  bottom: -100px;
-  right: -100px;
 }
 
 .card {
-  background: var(--bg, #ffffff);
-  border: 1px solid var(--border, #e5e4e7);
-  border-radius: 24px;
-  padding: 3rem 2.5rem;
-  max-width: 520px;
-  width: 100%;
-  box-shadow: var(--shadow, 0 10px 25px rgba(0, 0, 0, 0.08));
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
   position: relative;
   z-index: 1;
+  max-width: 520px;
+  width: 100%;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+@media (prefers-color-scheme: dark) {
+  .card {
+    background: rgba(22, 23, 29, 0.85);
+  }
 }
 
 .logo {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 10px;
   font-weight: 700;
-  font-size: 1.1rem;
-  color: var(--text-h, #08060d);
-  letter-spacing: 1px;
-  margin-bottom: 1.5rem;
+  font-size: 14px;
+  letter-spacing: 1.5px;
+  color: var(--text-h);
+  margin-bottom: 24px;
 }
 
 .logo-mark {
-  width: 36px;
-  height: 36px;
-  background: linear-gradient(135deg, #aa3bff, #7c3aed);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent), #ff5e9c);
   color: #fff;
-  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
-  font-size: 1.2rem;
+  font-weight: 900;
 }
 
 h1 {
-  margin: 0 0 1rem 0;
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: var(--text-h, #08060d);
-  line-height: 1.2;
+  margin: 0 0 12px;
+  font-size: 38px;
+  line-height: 1.15;
+  background: linear-gradient(135deg, var(--text-h), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .description {
-  color: var(--text, #6b6375);
-  font-size: 1.05rem;
-  line-height: 1.5;
-  margin-bottom: 2rem;
+  font-size: 16px;
+  color: var(--text);
+  margin-bottom: 32px;
 }
 
 .action-area {
-  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.25rem;
+  gap: 20px;
 }
 
 .hola-btn {
-  background: linear-gradient(135deg, #aa3bff, #8b5cf6);
+  background: linear-gradient(135deg, var(--accent), #8b2fc9);
   color: #ffffff;
   border: none;
-  padding: 0.9rem 2.5rem;
-  font-size: 1.15rem;
+  border-radius: 12px;
+  padding: 14px 36px;
+  font-size: 18px;
   font-weight: 600;
-  border-radius: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 15px rgba(170, 59, 255, 0.3);
+  box-shadow: 0 4px 14px rgba(170, 59, 255, 0.35);
 }
 
 .hola-btn:hover {
@@ -119,39 +119,38 @@ h1 {
 }
 
 .greeting-card {
-  background: var(--accent-bg, rgba(170, 59, 255, 0.08));
-  border: 1px solid var(--accent-border, rgba(170, 59, 255, 0.3));
+  margin-top: 12px;
+  padding: 16px 20px;
+  background: var(--accent-bg);
+  border: 1px solid var(--accent-border);
   border-radius: 12px;
-  padding: 1rem 1.25rem;
-  width: 100%;
-  box-sizing: border-box;
   animation: fadeIn 0.3s ease;
+  max-width: 100%;
 }
 
-.greeting-card p {
-  color: var(--text-h, #08060d);
+.greeting-text {
+  color: var(--text-h);
   font-weight: 500;
-  font-size: 1rem;
+  font-size: 16px;
   margin: 0;
 }
 
 .click-counter {
   display: block;
-  margin-top: 0.5rem;
-  font-size: 0.85rem;
-  color: var(--accent, #aa3bff);
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--accent);
   font-weight: 600;
 }
 
 .footer {
-  margin-top: 2.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border, #e5e4e7);
-  width: 100%;
   display: flex;
   justify-content: space-between;
-  font-size: 0.85rem;
-  color: var(--text, #6b6375);
+  margin-top: 36px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text);
 }
 
 @keyframes fadeIn {

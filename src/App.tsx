@@ -24,7 +24,7 @@ function App() {
         <h1>Mi primera app GITLOVE</h1>
 
         <p className="description">
-          ¡Felicidades! Esta es tu primera aplicación creada con el agente AI de GITLOVE.
+          ¡Felicidades! Esta es tu primera aplicación creada con GITLOVE.
         </p>
 
         <div className="action-area">
@@ -34,7 +34,7 @@ function App() {
 
           {greeting && (
             <div className="greeting-card">
-              <p>{greeting}</p>
+              <p className="greeting-text">{greeting}</p>
               {count > 1 && (
                 <span className="click-counter">
                   Has hecho clic en "Hola" {count} veces 🎉
