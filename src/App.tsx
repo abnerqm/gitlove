@@ -1,7 +1,7 @@
 import { useState } from "react";
 import "./App.css";
 
-function App() {
+export default function App() {
   const [greeting, setGreeting] = useState<string | null>(null);
   const [count, setCount] = useState(0);
 
@@ -11,46 +11,31 @@ function App() {
   };
 
   return (
-    <main className="app-container">
-      <div className="background-glow glow-one" />
-      <div className="background-glow glow-two" />
-
-      <section className="card">
-        <div className="logo">
-          <div className="logo-mark">G</div>
-          <span>GITLOVE</span>
+    <div className="app-container">
+      <div className="card">
+        <div className="badge">
+          <span className="heart">❤️</span> Powered by GITLOVE
         </div>
-
+        
         <h1>Mi primera app GITLOVE</h1>
-
-        <p className="description">
-          ¡Felicidades! Esta es tu primera aplicación creada con GITLOVE.
+        
+        <p className="subtitle">
+          ¡Haz clic en el botón para interactuar!
         </p>
 
-        <div className="action-area">
-          <button className="hola-btn" onClick={handleHolaClick}>
-            Hola
-          </button>
+        <button className="hola-btn" onClick={handleHolaClick}>
+          Hola
+        </button>
 
-          {greeting && (
-            <div className="greeting-card">
-              <p className="greeting-text">{greeting}</p>
-              {count > 1 && (
-                <span className="click-counter">
-                  Has hecho clic en "Hola" {count} veces 🎉
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div className="footer">
-          <span>GITLOVE Workspace</span>
-          <span>v0.1.0</span>
-        </div>
-      </section>
-    </main>
+        {greeting && (
+          <div className="response-box">
+            <p className="greeting">{greeting}</p>
+            <span className="counter-badge">
+              Has presionado "Hola" {count} {count === 1 ? "vez" : "veces"} ✨
+            </span>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
-
-export default App;
