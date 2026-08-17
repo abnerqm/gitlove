@@ -61,11 +61,11 @@ function App() {
 
         <p className="eyebrow">AI CODING WORKSPACE</p>
 
-        <h1>
-          Your Lovable projects,
-          <br />
-          directly powered by GitHub.
-        </h1>
+        <h1>Mi primera app GITLOVE</h1>
+
+        <button style={{ marginBottom: "1.5rem" }} onClick={() => alert("¡Hola!")}>
+          Hola
+        </button>
 
         <p className="description">
           Build, modify and improve your project using an AI coding agent
