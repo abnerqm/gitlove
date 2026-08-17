@@ -35,7 +35,7 @@ export default function App() {
         <h1 className="title">Mi primera app GITLOVE</h1>
         
         <p className="description">
-          ¡Bienvenido a tu nueva aplicación creada de forma autónoma por GITLOVE! Presiona el botón para comenzar.
+          ¡Bienvenido a tu nueva aplicación creada con GITLOVE! Haz clic en el botón para comenzar.
         </p>
 
         <button className="btn-hola" onClick={handleHolaClick}>
